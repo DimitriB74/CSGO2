@@ -23,6 +23,7 @@ namespace PointDeRupture.Combat
         [SerializeField] private float _respawnDelay = 3f;
 
         [Header("Références du prefab")]
+        [Tooltip("Facultatif : absent sur une cible d'entraînement.")]
         [SerializeField] private PlayerAgent _agent;
 
         [Tooltip("Modèle à masquer à la mort.")]
@@ -143,7 +144,10 @@ namespace PointDeRupture.Combat
             {
                 if (changed == nameof(IsAlive))
                 {
-                    if (_visualRoot != null && !_agent.HasInputAuthority)
+                    // _agent est facultatif : une cible d'entraînement porte un
+                    // PlayerHealth sans PlayerAgent.
+                    bool isOwnBody = _agent != null && _agent.HasInputAuthority;
+                    if (_visualRoot != null && !isOwnBody)
                         _visualRoot.SetActive(IsAlive);
                 }
                 else if (changed == nameof(HitCount))

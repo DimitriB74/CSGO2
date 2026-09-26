@@ -24,6 +24,7 @@ existant.
 
 | Fichier | Contenu |
 |---|---|
+| [`docs/05-comment-tester.md`](docs/05-comment-tester.md) | **commence ici** : les 3 niveaux de test, du plus simple au plus complet |
 | [`docs/00-architecture.md`](docs/00-architecture.md) | architecture globale, flux d'un tir, d'un achat, d'un round, règles réseau |
 | [`docs/01-univers-et-armes.md`](docs/01-univers-et-armes.md) | camps, maps, 20 armes avec tableau d'équilibrage, économie, durées |
 | [`docs/02-phase-0.md`](docs/02-phase-0.md) | installation pas à pas et test à 2 joueurs |
