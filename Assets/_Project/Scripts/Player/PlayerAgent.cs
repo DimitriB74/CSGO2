@@ -1,4 +1,5 @@
 using Fusion;
+using PointDeRupture.Combat;
 using PointDeRupture.Data;
 using PointDeRupture.Networking;
 using UnityEngine;
@@ -35,8 +36,17 @@ namespace PointDeRupture.Player
 
         [SerializeField] private PlayerCameraRig _cameraRig;
 
+        [Tooltip("Vie et armure. Laisser vide si le prefab n'en a pas encore.")]
+        [SerializeField] private PlayerHealth _health;
+
+        [Tooltip("Arme équipée. Laisser vide en Phase 1.")]
+        [SerializeField] private WeaponRuntime _weapon;
+
         [Tooltip("Modèle visible par les autres joueurs. Masqué pour soi-même.")]
         [SerializeField] private GameObject _thirdPersonVisual;
+
+        [Tooltip("Parent des hitbox. Écrasé quand le joueur s'accroupit.")]
+        [SerializeField] private Transform _hitboxRoot;
 
         // ---- état réseau ----------------------------------------------------
         // Tout ce qui est ci-dessous est restauré par Fusion avant une
@@ -64,6 +74,16 @@ namespace PointDeRupture.Player
         /// </summary>
         [Networked] public NetworkButtons PreviousButtons { get; set; }
 
+        /// <summary>
+        /// Recul poussé sur la vue, en degrés : x = tangage (négatif = vers le
+        /// haut), y = lacet.
+        ///
+        /// Il est réseau parce qu'il influe sur la direction des balles : après
+        /// une resimulation, le client doit retrouver exactement le même recul,
+        /// sinon ses balles ne partent plus là où le host les envoie.
+        /// </summary>
+        [Networked] public Vector2 ViewPunch { get; set; }
+
         private ICharacterMotor _motor;
 
         /// <summary>
@@ -85,10 +105,68 @@ namespace PointDeRupture.Player
             get { return transform.position + Vector3.up * _movementProfile.EyeHeightFor(CrouchBlend); }
         }
 
-        /// <summary>Direction du regard.</summary>
+        /// <summary>Direction du regard, recul non compris.</summary>
         public Vector3 AimDirection
         {
             get { return Quaternion.Euler(Pitch, Yaw, 0f) * Vector3.forward; }
+        }
+
+        /// <summary>
+        /// Direction réelle d'une balle : le regard plus le recul.
+        ///
+        /// C'est aussi là que pointe le viseur, puisque la caméra reçoit le même
+        /// décalage. Le joueur voit donc toujours où partent ses balles.
+        /// </summary>
+        public Vector3 FireDirection
+        {
+            get
+            {
+                Vector2 punch = ViewPunch;
+                return Quaternion.Euler(Pitch + punch.x, Yaw + punch.y, 0f) * Vector3.forward;
+            }
+        }
+
+        /// <summary>Vitesse de course de référence, lue par le calcul de précision.</summary>
+        public float RunSpeed
+        {
+            get { return _movementProfile != null ? _movementProfile.RunSpeed : 6.35f; }
+        }
+
+        /// <summary>Le personnage est-il vivant ? Vrai s'il n'a pas de composant de vie.</summary>
+        public bool IsAliveOrNoHealth
+        {
+            get { return _health == null || _health.IsAlive; }
+        }
+
+        /// <summary>Ajoute un coup de recul. Appelé par l'arme au moment du tir.</summary>
+        public void AddViewPunch(Vector2 kick)
+        {
+            Vector2 punch = ViewPunch + kick;
+
+            // On borne : sans cela, une longue rafale finirait par viser le ciel
+            // et le joueur perdrait tout repère.
+            punch.x = Mathf.Clamp(punch.x, -12f, 3f);
+            punch.y = Mathf.Clamp(punch.y, -7f, 7f);
+            ViewPunch = punch;
+        }
+
+        /// <summary>Retour progressif de la vue au repos.</summary>
+        public void RecoverViewPunch(float recoverRate, float deltaTime)
+        {
+            ViewPunch = RecoilSolver.Recover(ViewPunch, recoverRate, deltaTime);
+        }
+
+        /// <summary>Repositionne le personnage. Host uniquement (apparition, round).</summary>
+        public void TeleportTo(Vector3 position, float yaw)
+        {
+            Yaw = yaw;
+            Pitch = 0f;
+            Velocity = Vector3.zero;
+            CrouchBlend = 0f;
+            IsGrounded = true;
+            ViewPunch = Vector2.zero;
+            transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+            if (_motor != null) _motor.Teleport(position);
         }
 
         /// <summary>
@@ -164,6 +242,15 @@ namespace PointDeRupture.Player
             NetworkButtons pressed = input.Buttons.GetPressed(PreviousButtons);
             PreviousButtons = input.Buttons;
 
+            // Un mort ne bouge plus et ne tire plus, mais on continue de lire les
+            // inputs pour que la visée reste libre en attendant la réapparition.
+            if (!IsAliveOrNoHealth)
+            {
+                Velocity = Vector3.zero;
+                ViewPunch = Vector2.zero;
+                return;
+            }
+
             // ---- déplacement --------------------------------------------------
             MotorInput motorInput = new MotorInput();
             motorInput.Move = input.Move;
@@ -172,8 +259,9 @@ namespace PointDeRupture.Player
             motorInput.Crouch = input.Buttons.IsSet((int)PlayerButton.Crouch);
             motorInput.Walk = input.Buttons.IsSet((int)PlayerButton.Walk);
 
-            // Phase 3 : ce facteur viendra de l'arme tenue. Pour l'instant, 1.
-            motorInput.WeaponSpeedFactor = 1f;
+            // L'arme tenue ralentit le déplacement : un sniper court moins vite
+            // qu'un couteau, et la lunette ralentit encore.
+            motorInput.WeaponSpeedFactor = _weapon != null ? _weapon.MoveSpeedFactor : 1f;
 
             MotorState state = new MotorState();
             state.Velocity = Velocity;
@@ -185,13 +273,33 @@ namespace PointDeRupture.Player
             Velocity = state.Velocity;
             CrouchBlend = state.CrouchBlend;
             IsGrounded = state.IsGrounded;
+
+            // Les hitbox suivent la posture DANS la simulation, et non dans
+            // Render : la compensation de latence rembobine des positions
+            // simulées, donc une hitbox qui ne bougerait qu'à l'affichage serait
+            // rembobinée au mauvais endroit et s'accroupir ne protégerait pas.
+            ApplyCrouchToHitboxes();
+
+            // Le tir vient APRÈS le déplacement et la visée, et c'est nous qui
+            // l'appelons : l'ordre est ainsi garanti, indépendamment de l'ordre
+            // des composants sur le prefab.
+            if (_weapon != null) _weapon.Simulate(input, pressed, Runner.DeltaTime);
+        }
+
+        private void ApplyCrouchToHitboxes()
+        {
+            if (_hitboxRoot == null) return;
+
+            float scale = _movementProfile.HeightFor(CrouchBlend) / _movementProfile.StandHeight;
+            _hitboxRoot.localScale = new Vector3(1f, scale, 1f);
         }
 
         public override void Render()
         {
             // Hauteur des yeux et tangage : purement visuel, donc ici.
             if (_cameraRig != null && HasInputAuthority)
-                _cameraRig.UpdateView(_movementProfile.EyeHeightFor(CrouchBlend), Pitch);
+                _cameraRig.UpdateView(_movementProfile.EyeHeightFor(CrouchBlend), Pitch,
+                    ViewPunch, _weapon != null ? _weapon.FieldOfViewOverride : 0f);
 
             // Le modèle des autres joueurs s'écrase quand ils s'accroupissent.
             if (_thirdPersonVisual != null && _thirdPersonVisual.activeSelf)

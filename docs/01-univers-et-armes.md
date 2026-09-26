@@ -139,8 +139,10 @@ contrôle beaucoup plus facilement. C'est l'opposition centrale du jeu.
 | **Voskov Monolithe** (lourd) | 4750 | 115 | ×2.5 | 97 % | 41 | 10 / 30 | 3.7 s | 0.10° | 9 | 5.35 | **100** | Tous |
 | **Meridian Verdict** (semi-auto) | 5000 | 80 | ×3.0 | 82 % | 150 | 20 / 90 | 3.9 s | 0.16° | 6 | 5.60 | 300 | Tous |
 
-*Monolithe* tue en un tir au torse, jambes comprises au-dessus du genou.
-Récompense volontairement basse (100 $) pour ne pas récompenser le camping.
+*Monolithe* tue en un tir au torse et au ventre, à toute distance, même contre un
+gilet. **Pas** dans les jambes en revanche : 84 dégâts, vérifié dans le tableau
+de `docs/04-phase-2.md`. Récompense volontairement basse (100 $) pour ne pas
+récompenser le camping.
 
 ### Mitrailleuse
 
@@ -167,6 +169,24 @@ Récompense volontairement basse (100 $) pour ne pas récompenser le camping.
 | **Kit de désamorçage** | 400 | désamorçage 10 s → 5 s | Verrou |
 
 ---
+
+### Perte de dégâts à la distance
+
+Chaque arme a un facteur appliqué tous les 12,7 m parcourus par la balle. Les
+valeurs exactes sont dans les assets générés ; par famille :
+
+| Famille | Facteur / 12,7 m | Effet à 30 m |
+|---|---|---|
+| Fusils d'assaut, snipers, mitrailleuse | 0,97 à 0,99 | −2 à −7 % |
+| Pistolets | 0,81 à 0,99 | −5 à −38 % |
+| Pistolets-mitrailleurs | 0,81 à 0,84 | −32 à −38 % |
+| Fusils à pompe | 0,70 | −57 % |
+
+C'est ce qui donne à chaque famille sa portée utile : une SMG reste redoutable
+en intérieur et devient inoffensive sur un long angle.
+
+Le tableau complet des dégâts par balle et du nombre de balles pour tuer, calculé
+depuis ces valeurs, est dans [`docs/04-phase-2.md`](04-phase-2.md).
 
 ## 5. Multiplicateurs de zone
 

@@ -28,6 +28,7 @@ existant.
 | [`docs/01-univers-et-armes.md`](docs/01-univers-et-armes.md) | camps, maps, 20 armes avec tableau d'équilibrage, économie, durées |
 | [`docs/02-phase-0.md`](docs/02-phase-0.md) | installation pas à pas et test à 2 joueurs |
 | [`docs/03-phase-1.md`](docs/03-phase-1.md) | réseau, déplacement, caméra : scripts, réglages éditeur, test à 2 joueurs |
+| [`docs/04-phase-2.md`](docs/04-phase-2.md) | tir lag-compensé, dégâts par zone, hitbox, tableaux de dégâts vérifiés |
 
 ## Feuille de route
 
@@ -35,7 +36,7 @@ existant.
 |---|---|---|
 | 0 | Installation (Unity 6, URP, Fusion 2, App ID, Simple KCC, structure) | livrée |
 | 1 | Connexion, apparition de 2 joueurs, déplacement FPS et caméra | **livrée, à tester** |
-| 2 | Première arme, tir hitscan lag-compensé, vie, mort, réapparition | à faire |
+| 2 | Première arme, tir hitscan lag-compensé, vie, mort, réapparition | **livrée, à tester** |
 | 3 | Système d'armes complet en ScriptableObjects | à faire |
 | 4 | Mode Deathmatch jouable | à faire |
 | 5 | Équipes, rounds, économie, menu d'achat | à faire |

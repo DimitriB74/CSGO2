@@ -65,19 +65,36 @@ namespace PointDeRupture.Player
         /// <see cref="PlayerAgent.Render"/>, donc à la fréquence d'affichage et
         /// jamais dans la simulation.
         /// </summary>
-        public void UpdateView(float eyeHeight, float pitch)
+        /// <param name="eyeHeight">Hauteur des yeux, qui suit l'accroupissement.</param>
+        /// <param name="pitch">Angle vertical du regard, en degrés.</param>
+        /// <param name="viewPunch">
+        /// Décalage de recul, en degrés : x = tangage, y = lacet. Il est appliqué
+        /// à la caméra, donc **le viseur suit les balles** : compenser le recul en
+        /// tirant la souris vers le bas fonctionne exactement comme attendu.
+        /// </param>
+        /// <param name="fieldOfViewOverride">
+        /// Champ de vision imposé par une lunette, ou 0 pour garder le FOV normal.
+        /// </param>
+        public void UpdateView(float eyeHeight, float pitch, Vector2 viewPunch,
+            float fieldOfViewOverride)
         {
             if (_headAnchor == null) return;
 
-            // La hauteur des yeux suit l'accroupissement.
             Vector3 local = _headAnchor.localPosition;
             local.y = eyeHeight;
             _headAnchor.localPosition = local;
 
-            // Le lacet est déjà porté par la rotation du personnage : la caméra
-            // n'ajoute que le tangage. Cela évite d'appliquer deux fois le lacet.
-            if (_camera != null)
-                _camera.transform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+            if (_camera == null) return;
+
+            // Le lacet du regard est déjà porté par la rotation du personnage :
+            // la caméra n'ajoute que le tangage, plus le recul sur les deux axes.
+            _camera.transform.localRotation =
+                Quaternion.Euler(pitch + viewPunch.x, viewPunch.y, 0f);
+
+            // Le zoom de lunette est instantané côté FOV ; l'interpolation
+            // viendra avec les visuels en Phase 11.
+            float target = fieldOfViewOverride > 0f ? fieldOfViewOverride : FieldOfView;
+            if (!Mathf.Approximately(_camera.fieldOfView, target)) _camera.fieldOfView = target;
         }
 
         private void OnDisable()
