@@ -1,3 +1,8 @@
+> **Document archivé.** Il appartient à la première tentative en Unity +
+> Photon Fusion 2, abandonnée parce que Fusion ne fonctionne pas dans un
+> navigateur et ne peut pas être hébergé sur Render. Le jeu jouable est
+> maintenant en JavaScript à la racine du dépôt — voir le README.
+
 # Phase 2 — Première arme, tir lag-compensé, vie, mort, réapparition
 
 Objectif : deux joueurs se tirent dessus et se touchent **là où ils se voient**,

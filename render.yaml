@@ -1,0 +1,20 @@
+# Déploiement sur Render — https://render.com
+#
+# Un seul service web : le même processus sert les fichiers du client ET la
+# partie en WebSocket. Pas de serveur de jeu séparé, pas de port à ouvrir.
+#
+# Mise en ligne :
+#   1. pousser ce dépôt sur GitHub
+#   2. sur Render : New → Blueprint → choisir le dépôt
+#   3. Render lit ce fichier et déploie tout seul
+services:
+  - type: web
+    name: point-de-rupture
+    runtime: node
+    plan: free
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"

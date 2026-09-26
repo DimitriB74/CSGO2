@@ -1,51 +1,25 @@
-# ---- Unity ----------------------------------------------------------------
-[Ll]ibrary/
-[Tt]emp/
-[Oo]bj/
-[Bb]uild/
-[Bb]uilds/
-[Ll]ogs/
-[Uu]ser[Ss]ettings/
-[Mm]emoryCaptures/
-[Rr]ecordings/
+# Dépendances
+node_modules/
 
-# Never commit the generated solution / project files
-*.csproj
-*.unityproj
-*.sln
-*.suo
-*.tmp
-*.user
-*.userprefs
-*.pidb
-*.booproj
-*.svd
-*.pdb
-*.mdb
-*.opendb
-*.VC.db
-
-# Unity crash / build reports
-sysinfo.txt
-crashlytics-build.properties
-*.apk
-*.aab
-*.unitypackage
-*.app
-
-# Rider / VS / VSCode
-.idea/
-.vs/
-.vscode/
-.consulo/
-
-# OS noise
+# Journaux et fichiers temporaires
+*.log
+npm-debug.log*
 .DS_Store
 Thumbs.db
-desktop.ini
+.env
+.env.local
 
-# ---- Photon ---------------------------------------------------------------
-# L'App ID est une donnee de compte : il ne doit pas partir sur GitHub.
-# Chaque poste renseigne le sien via le Fusion Hub.
-Assets/Photon/Fusion/Resources/PhotonAppSettings.asset
-Assets/Photon/Fusion/Resources/PhotonAppSettings.asset.meta
+# Captures de test
+test-results/
+playwright-report/
+
+# ---- Prototype Unity archivé (unity-prototype/) --------------------------
+unity-prototype/[Ll]ibrary/
+unity-prototype/[Tt]emp/
+unity-prototype/[Oo]bj/
+unity-prototype/[Bb]uild/
+unity-prototype/[Ll]ogs/
+unity-prototype/[Uu]ser[Ss]ettings/
+*.csproj
+*.sln
+*.unitypackage

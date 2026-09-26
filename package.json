@@ -1,0 +1,20 @@
+{
+  "name": "point-de-rupture",
+  "version": "1.0.0",
+  "description": "FPS tactique multijoueur en rounds, jouable dans le navigateur",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js",
+    "test": "node test/sim.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "playwright": "^1.63.0",
+    "ws": "^8.18.0"
+  },
+  "license": "MIT"
+}

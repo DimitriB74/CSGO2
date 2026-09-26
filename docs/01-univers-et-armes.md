@@ -1,3 +1,6 @@
+> Ce document reste **la référence d'équilibrage du jeu**. Les valeurs vivent
+> dans `shared/weapons.js` et sont vérifiées par `npm test`.
+
 # Univers, nommage et équilibrage — *Point de Rupture*
 
 Rien de ce document ne reprend un nom, un logo, une map ou un son de

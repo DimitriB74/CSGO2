@@ -1,3 +1,8 @@
+> **Document archivé.** Il appartient à la première tentative en Unity +
+> Photon Fusion 2, abandonnée parce que Fusion ne fonctionne pas dans un
+> navigateur et ne peut pas être hébergé sur Render. Le jeu jouable est
+> maintenant en JavaScript à la racine du dépôt — voir le README.
+
 # Architecture globale — *Point de Rupture*
 
 Unity 6 LTS · URP · C# · Photon Fusion 2 (mode **Host**) · tick 64 Hz
