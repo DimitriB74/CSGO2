@@ -1,0 +1,51 @@
+# ---- Unity ----------------------------------------------------------------
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+
+# Never commit the generated solution / project files
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Unity crash / build reports
+sysinfo.txt
+crashlytics-build.properties
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# Rider / VS / VSCode
+.idea/
+.vs/
+.vscode/
+.consulo/
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Photon ---------------------------------------------------------------
+# L'App ID est une donnee de compte : il ne doit pas partir sur GitHub.
+# Chaque poste renseigne le sien via le Fusion Hub.
+Assets/Photon/Fusion/Resources/PhotonAppSettings.asset
+Assets/Photon/Fusion/Resources/PhotonAppSettings.asset.meta
